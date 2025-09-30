@@ -507,7 +507,7 @@ export default {
 /* Feature Card */
 .feature-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(206, 162, 162, 0.8);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(99, 102, 241, 0.1);
   border-radius: var(--radius-lg);
@@ -520,7 +520,7 @@ export default {
 
 .feature-card:hover {
   transform: translateY(-12px) rotateX(2deg);
-  border-color: rgba(99, 102, 241, 0.3);
+  border-color: rgba(10, 13, 207, 0.3);
   box-shadow: var(--shadow-strong);
 }
 
@@ -530,7 +530,7 @@ export default {
   background: linear-gradient(135deg,
     rgba(99, 102, 241, 0.02) 0%,
     rgba(139, 92, 246, 0.02) 50%,
-    rgba(6, 182, 212, 0.02) 100%);
+    rgba(0, 19, 22, 0.02) 100%);
   opacity: 0;
   transition: opacity var(--transition-medium);
 }

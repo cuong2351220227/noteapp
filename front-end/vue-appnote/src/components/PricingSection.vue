@@ -1,50 +1,79 @@
 <template>
   <section class="pricing">
     <div class="pricing-content">
+      <!-- Background Effects -->
+      <div class="bg-effects">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+      </div>
+
+      <!-- Header Section -->
       <div class="pricing-header">
-        <h2>Giảm công cụ. Tăng hiệu suất.</h2>
-        <p class="pricing-subtitle">Tập hợp mọi công cụ về cùng một nơi.</p>
+        <div class="header-badge">
+          <span>Giải pháp AI toàn diện</span>
+        </div>
+        <h2 class="main-title">
+          Giảm công cụ. Tăng hiệu suất.
+        </h2>
+        <p class="subtitle">
+          Tập hợp mọi công cụ AI về cùng một nơi để tăng năng suất lên 3x
+        </p>
       </div>
       
+      <!-- Pricing Card -->
       <div class="price-container">
-        <div class="price-box">
-          <div class="price-badge">
+        <div class="price-card">
+          <!-- Premium Badge -->
+          <div class="premium-badge">
             <span class="badge-text">Tiết kiệm</span>
             <span class="badge-amount">4.080 US$</span>
           </div>
           
-          <div class="price-main">
-            <div class="price-amount">
+          <!-- Price Display -->
+          <div class="price-display">
+            <div class="price-wrapper">
               <span class="currency">$</span>
-              <span class="amount">340</span>
-              <span class="period">/ tháng</span>
+              <span class="price-amount">340</span>
+              <span class="price-period">/tháng</span>
             </div>
-            
-            <div class="price-savings">
-              <span class="savings-text">Tiết kiệm hằng năm:</span>
+            <div class="price-note">Thanh toán hàng năm</div>
+          </div>
+
+          <!-- Savings Highlight -->
+          <div class="savings-highlight">
+            <div class="savings-icon">💰</div>
+            <div class="savings-content">
+              <span class="savings-label">Tiết kiệm hằng năm</span>
               <span class="savings-amount">4.080 US$</span>
             </div>
           </div>
           
-          <div class="price-features">
-            <div class="feature-item">
-              <span class="feature-icon">✨</span>
-              <span>Tất cả công cụ AI tích hợp</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-icon">🚀</span>
-              <span>Tăng hiệu suất lên 3x</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-icon">💡</span>
-              <span>Hỗ trợ 24/7</span>
+          <!-- Features List -->
+          <div class="features-list">
+            <div class="feature-item" v-for="(feature, index) in features" :key="index">
+              <div class="feature-icon">{{ feature.icon }}</div>
+              <div class="feature-content">
+                <span class="feature-title">{{ feature.title }}</span>
+                <span class="feature-desc">{{ feature.desc }}</span>
+              </div>
             </div>
           </div>
           
-          <button class="cta-button">
-            Bắt đầu ngay
-            <span class="button-arrow">→</span>
+          <!-- CTA Button -->
+          <button class="cta-button" @click="handleStartNow">
+            <span class="button-content">
+              <span class="button-text">Bắt đầu ngay</span>
+              <span class="button-icon">→</span>
+            </span>
+            <div class="button-glow"></div>
           </button>
+
+          <!-- Trust Indicators -->
+          <div class="trust-indicators">
+            <span class="trust-item">✅ Hủy bất cứ lúc nào</span>
+            <span class="trust-item">🛡️ Bảo mật 100%</span>
+          </div>
         </div>
       </div>
     </div>
@@ -52,309 +81,388 @@
 </template>
 
 <script>
-export default { 
-  name: "PricingSection"
+export default {
+  name: "PricingSection",
+  data() {
+    return {
+      features: [
+        {
+          icon: "🤖",
+          title: "Tất cả công cụ AI tích hợp",
+          desc: "ChatGPT, Claude, Midjourney & hơn 50 công cụ khác"
+        },
+        {
+          icon: "⚡",
+          title: "Tăng hiệu suất lên 3x",
+          desc: "Tự động hóa workflow và tối ưu quy trình làm việc"
+        },
+        {
+          icon: "🚀",
+          title: "Hỗ trợ 24/7",
+          desc: "Đội ngũ chuyên gia sẵn sàng hỗ trợ mọi lúc"
+        }
+      ]
+    }
+  },
+  methods: {
+    handleStartNow() {
+      // Handle CTA button click
+      console.log('Starting subscription...');
+    }
+  }
 }
 </script>
 
 <style scoped>
 /* CSS Variables */
 :root {
-  --pricing-bg: #ffffff;
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
-  --accent-blue: #3b82f6;
-  --accent-green: #10b981;
-  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --card-bg: #ffffff;
-  --card-border: #e5e7eb;
-  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.1);
-  --border-radius: 20px;
-  --border-radius-lg: 24px;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --dark-bg: #0f0f23;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
+  --border-glass: rgba(255, 255, 255, 0.2);
+  --shadow-glow: 0 0 50px rgba(102, 126, 234, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .pricing {
-  padding: 120px 40px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%);
-  text-align: center;
+  min-height: 100vh;
+  padding: 80px 20px;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, var(--dark-bg) 0%, #1a1a3a 100%);
   position: relative;
   overflow: hidden;
-  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Decorative background */
-.pricing::before {
-  content: '';
+.pricing-content {
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+/* Background Effects */
+.bg-effects {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 70% 70%, rgba(16, 185, 129, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 50% 100%, rgba(147, 197, 253, 0.02) 0%, transparent 50%);
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
-.pricing::after {
-  content: '';
+.floating-orb {
   position: absolute;
-  top: 15%;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: var(--primary-gradient);
+  top: 10%;
   right: 10%;
+  animation-delay: 0s;
+}
+
+.orb-2 {
   width: 200px;
   height: 200px;
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  animation: floatGentle 10s ease-in-out infinite;
+  background: var(--secondary-gradient);
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 2s;
 }
 
-@keyframes floatGentle {
-  0%, 100% { 
+.orb-3 {
+  width: 150px;
+  height: 150px;
+  background: var(--success-gradient);
+  top: 60%;
+  right: 20%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
     transform: translate(0, 0) scale(1);
   }
-  50% { 
-    transform: translate(-30px, -20px) scale(1.1);
+  25% {
+    transform: translate(20px, -20px) scale(1.1);
   }
-}
-
-.pricing-content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-  width: 100%;
+  50% {
+    transform: translate(-15px, 15px) scale(0.9);
+  }
+  75% {
+    transform: translate(10px, -10px) scale(1.05);
+  }
 }
 
 /* Header Styling */
 .pricing-header {
+  text-align: center;
   margin-bottom: 60px;
 }
 
-.pricing h2 {
-  font-size: clamp(32px, 4vw, 52px);
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 14px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  backdrop-filter: blur(20px);
+}
+
+.badge-icon {
+  font-size: 16px;
+}
+
+.main-title {
+  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(36px, 5vw, 56px);
   font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 20px;
   line-height: 1.1;
+  margin-bottom: 20px;
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
-.pricing-subtitle {
-  font-size: 20px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin: 0;
-  opacity: 0.9;
+/* Remove unused gradient-text class */
+
+.subtitle {
+  color: #0f0f23;
+  font-size: 18px;
+  
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
-/* Price Container */
+/* Price Card */
 .price-container {
-  position: relative;
   display: flex;
   justify-content: center;
 }
 
-.price-box {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--border-radius-lg);
-  padding: 48px 40px;
-  box-shadow: var(--card-shadow);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.price-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(19, 16, 16, 0.3);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glow);
   position: relative;
-  overflow: hidden;
-  max-width: 500px;
   width: 100%;
+  max-width: 480px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.price-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.02) 0%, 
-    rgba(16, 185, 129, 0.02) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.price-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 80px rgba(102, 126, 234, 0.4);
 }
 
-.price-box:hover {
-  transform: translateY(-10px);
-  box-shadow: var(--card-shadow-hover);
-  border-color: var(--accent-blue);
-}
-
-.price-box:hover::before {
-  opacity: 1;
-}
-
-/* Price Badge */
-.price-badge {
+/* Premium Badge */
+.premium-badge {
   position: absolute;
   top: -1px;
-  right: 24px;
-  background: var(--accent-gradient);
+  right: 30px;
+  background: var(--primary-gradient);
   color: white;
-  padding: 8px 20px;
-  border-radius: 0 0 12px 12px;
-  font-size: 12px;
+  padding: 12px 24px;
+  border-radius: 0 0 16px 16px;
+  text-align: center;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 }
 
 .badge-text {
+  color: #0f0f23;
   display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .badge-amount {
+  color: #0f0f23;
   display: block;
   font-size: 14px;
-  opacity: 0.9;
+  margin-top: 2px;
 }
 
-/* Price Main */
-.price-main {
-  margin-bottom: 32px;
-  position: relative;
-  z-index: 2;
+/* Price Display */
+.price-display {
+  text-align: center;
+  margin: 40px 0 32px 0;
 }
 
-.price-amount {
+.price-wrapper {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  margin-bottom: 16px;
-  position: relative;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
 .currency {
-  font-size: 24px;
-  color: var(--text-secondary);
+  font-size: 28px;
+  color: #6194d7;
   font-weight: 600;
-  margin-right: 4px;
 }
 
-.amount {
-  font-size: 64px;
+.price-amount {
+  font-size: 72px;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1;
-  background: var(--accent-gradient);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
-.period {
-  font-size: 18px;
-  color: var(--text-secondary);
+.price-period {
+  font-size: 20px;
+  color: #315078;
   font-weight: 500;
-  margin-left: 8px;
 }
 
-.price-savings {
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-radius: 12px;
-  border: 1px solid rgba(59, 130, 246, 0.1);
-}
-
-.savings-text {
+.price-note {
   font-size: 14px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  display: block;
-  margin-bottom: 4px;
+  color: #3e6696;
+}
+
+/* Savings Highlight */
+.savings-highlight {
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+  border: 1px solid rgba(79, 172, 254, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.savings-icon {
+  font-size: 24px;
+}
+
+.savings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.savings-label {
+  font-size: 14px;
+  color: #e2e8f0;
 }
 
 .savings-amount {
   font-size: 18px;
-  color: var(--accent-green);
   font-weight: 700;
+  color: #4facfe;
 }
 
-/* Price Features */
-.price-features {
+/* Features List */
+.features-list {
   margin-bottom: 32px;
-  position: relative;
-  z-index: 2;
 }
 
 .feature-item {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  padding: 12px 0;
-  font-size: 16px;
-  color: var(--text-primary);
-  font-weight: 500;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .feature-item:last-child {
-  margin-bottom: 0;
+  border-bottom: none;
 }
 
 .feature-icon {
-  font-size: 20px;
-  margin-right: 12px;
-  animation: bounce 2s infinite;
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: var(--glass-bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.feature-item:nth-child(2) .feature-icon {
-  animation-delay: 0.2s;
+.feature-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.feature-item:nth-child(3) .feature-icon {
-  animation-delay: 0.4s;
+.feature-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-4px);
-  }
-  60% {
-    transform: translateY(-2px);
-  }
+.feature-desc {
+  font-size: 14px;
+  color: #cbd5e1;
+  line-height: 1.4;
 }
 
 /* CTA Button */
 .cta-button {
-  background: var(--accent-gradient);
-  color: white;
+  width: 100%;
+  background: var(--primary-gradient);
   border: none;
-  padding: 16px 32px;
-  border-radius: 12px;
+  border-radius: 16px;
+  padding: 18px;
   font-size: 18px;
   font-weight: 700;
+  color: rgb(23, 4, 4);
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
   z-index: 2;
 }
 
-.cta-button::before {
-  content: '';
+.button-icon {
+  transition: transform 0.3s ease;
+}
+
+.button-glow {
   position: absolute;
   top: 0;
   left: -100%;
@@ -366,90 +474,94 @@ export default {
 
 .cta-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
 }
 
-.cta-button:hover::before {
+.cta-button:hover .button-icon {
+  transform: translateX(4px);
+}
+
+.cta-button:hover .button-glow {
   left: 100%;
 }
 
-.button-arrow {
-  transition: transform 0.3s ease;
+/* Trust Indicators */
+.trust-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
-.cta-button:hover .button-arrow {
-  transform: translateX(4px);
+.trust-item {
+  font-size: 13px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .pricing {
-    padding: 80px 20px;
+    padding: 60px 16px;
   }
   
-  .pricing-header {
-    margin-bottom: 40px;
-  }
-  
-  .price-box {
+  .price-card {
     padding: 32px 24px;
-    margin: 0 16px;
   }
   
-  .amount {
-    font-size: 48px;
+  .price-amount {
+    font-size: 56px;
   }
   
-  .price-badge {
-    right: 16px;
-  }
-  
-  .feature-item {
-    font-size: 15px;
-  }
-  
-  .cta-button {
-    padding: 14px 28px;
-    font-size: 16px;
+  .trust-indicators {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .pricing {
-    padding: 60px 16px;
+    padding: 40px 12px;
   }
   
-  .price-box {
+  .price-card {
     padding: 24px 20px;
-    margin: 0 8px;
   }
   
-  .amount {
-    font-size: 40px;
+  .premium-badge {
+    right: 20px;
+    padding: 8px 16px;
   }
   
-  .pricing-subtitle {
-    font-size: 18px;
+  .feature-item {
+    gap: 12px;
+  }
+  
+  .savings-highlight {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
   }
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .pricing::after,
-  .feature-icon,
-  .cta-button::before {
+  .floating-orb,
+  .button-glow {
     animation: none;
   }
   
-  .price-box:hover,
+  .price-card:hover,
   .cta-button:hover {
     transform: none;
   }
 }
 
-/* Focus styles */
 .cta-button:focus {
-  outline: 2px solid var(--accent-blue);
+  outline: 2px solid #4facfe;
   outline-offset: 2px;
 }
 </style>

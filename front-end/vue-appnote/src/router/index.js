@@ -75,9 +75,15 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: () => import('../views/AdminDashboard.vue'),
+    redirect: { name: 'adminDashboard' },
     beforeEnter: async (to, from, next) => {
-      const { adminGuard } = await import('./guards/adminGuard');
-      adminGuard(to, from, next);
+      try {
+        const { adminGuard } = await import('./guards/adminGuard');
+        await adminGuard(to, from, next);
+      } catch (error) {
+        console.error('Error in admin route guard:', error);
+        next({ name: 'login' });
+      }
     },
     children: [
       {

@@ -217,8 +217,8 @@ export default {
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.02) 0%, 
-    rgba(16, 185, 129, 0.02) 100%);
+    rgba(0, 5, 13, 0.02) 0%, 
+    rgba(0, 0, 0, 0.02) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }

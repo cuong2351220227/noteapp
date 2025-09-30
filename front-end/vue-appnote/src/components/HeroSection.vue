@@ -1049,7 +1049,7 @@ export default {
   flex-direction: column;
   min-height: 280px;
   padding: var(--space-lg);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(237, 167, 167, 0.8);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(99, 102, 241, 0.1);
   border-radius: var(--radius-lg);
