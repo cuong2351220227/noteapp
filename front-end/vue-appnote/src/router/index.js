@@ -74,34 +74,7 @@ const routes = [
   {
     path: '/admin',
     name: 'admin',
-    component: () => import('../views/AdminDashboard.vue'),
-    redirect: { name: 'adminDashboard' },
-    beforeEnter: async (to, from, next) => {
-      try {
-        const { adminGuard } = await import('./guards/adminGuard');
-        await adminGuard(to, from, next);
-      } catch (error) {
-        console.error('Error in admin route guard:', error);
-        next({ name: 'login' });
-      }
-    },
-    children: [
-      {
-        path: 'dashboard',
-        name: 'adminDashboard',
-        component: () => import('../views/admin/Dashboard.vue')
-      },
-      {
-        path: 'users',
-        name: 'adminUsers',
-        component: () => import('../views/admin/Users.vue')
-      },
-      {
-        path: 'stats',
-        name: 'adminStats',
-        component: () => import('../views/admin/Stats.vue')
-      }
-    ]
+    component: () => import('../views/AdminDashboardNew.vue')
   }
 ]
 
