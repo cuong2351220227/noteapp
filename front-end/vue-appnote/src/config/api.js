@@ -5,17 +5,27 @@ export const apiCall = async (endpoint, options = {}) => {
   
   const config = {
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
       ...options.headers
     },
     ...options,
-    credentials: 'include' // Thêm credentials
+    credentials: 'include'
   };
 
+  // Chỉ thêm Content-Type cho JSON, FormData sẽ tự động set Content-Type
+  if (!(options.body instanceof FormData)) {
+    config.headers['Content-Type'] = 'application/json';
+  }
+
   try {
-    console.log(`Making API call to: ${API_BASE_URL}${endpoint}`);
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log('[API] Request:', {
+      url,
+      method: options.method || 'GET',
+      headers: config.headers
+    });
+
+    const response = await fetch(url, config);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Network error' }));

@@ -1,175 +1,172 @@
 <template>
-    <div class="admin-dashboard">
-        <!-- Mobile Menu Toggle -->
-        <div class="mobile-menu-toggle" @click="toggleSidebar">
-            <i class="fas fa-bars"></i>
+  <div class="admin-dashboard">
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" @click="toggleSidebar">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar" :class="{ 'sidebar-open': sidebarOpen }">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-logo">
+            <div class="logo-circle">
+              <i class="fas fa-bolt"></i>
+            </div>
+          </div>
+          <div class="brand-text">
+            <h2>AdminHub</h2>
+            <span>Dashboard Pro</span>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="section-title">CHÍNH</span>
+          <router-link 
+            v-for="item in mainMenuItems" 
+            :key="item.path"
+            :to="item.path"
+            class="nav-item"
+            :class="{ active: currentRoute === item.path }"
+            @click="closeMobileSidebar"
+          >
+            <div class="nav-icon">
+              <i :class="item.icon"></i>
+            </div>
+            <span class="nav-text">{{ item.name }}</span>
+            <div class="nav-indicator"></div>
+          </router-link>
         </div>
 
-        <!-- Sidebar -->
-        <div class="dashboard-sidebar" :class="{ 'sidebar-open': sidebarOpen }">
-            <div class="sidebar-header">
-                <div class="brand">
-                    <div class="brand-logo">
-                        <div class="logo-circle">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                    </div>
-                    <div class="brand-text">
-                        <h2>AdminHub</h2>
-                        <span>Dashboard</span>
-                    </div>
+        <div class="nav-section">
+          <span class="section-title">QUẢN LÝ</span>
+          <router-link 
+            v-for="item in managementMenuItems" 
+            :key="item.path"
+            :to="item.path"
+            class="nav-item"
+            :class="{ active: currentRoute === item.path }"
+            @click="closeMobileSidebar"
+          >
+            <div class="nav-icon">
+              <i :class="item.icon"></i>
+            </div>
+            <span class="nav-text">{{ item.name }}</span>
+            <div class="nav-indicator"></div>
+          </router-link>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-card">
+          <div class="admin-avatar">
+            <img :src="adminAvatar" alt="Admin" />
+            <div class="status-dot"></div>
+          </div>
+          <div class="admin-info">
+            <span class="admin-name">{{ adminName }}</span>
+            <span class="admin-role">Administrator</span>
+          </div>
+          <button @click="showUserMenu" class="user-menu-btn">
+            <i class="fas fa-chevron-up"></i>
+          </button>
+        </div>
+        
+        <button @click="logout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Đăng xuất</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <div class="page-title">
+            <h1>{{ pageTitle }}</h1>
+            <span class="page-subtitle">{{ pageSubtitle }}</span>
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <!-- Search -->
+          <div class="header-search">
+            <div class="search-input">
+              <i class="fas fa-search"></i>
+              <input 
+                type="text" 
+                v-model="searchQuery"
+                placeholder="Tìm kiếm..."
+                @input="handleSearch"
+                @focus="searchFocused = true"
+                @blur="searchFocused = false"
+              >
+            </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="header-actions">
+            <!-- Notifications -->
+            <div class="action-item notification-bell" @click="toggleNotifications">
+              <i class="fas fa-bell"></i>
+              <span v-if="notifications.length" class="notification-badge">
+                {{ notifications.length }}
+              </span>
+              <div class="notification-panel" v-if="showNotifications" @click.stop>
+                <div class="panel-header">
+                  <h4>Thông báo</h4>
+                  <button class="mark-read-btn">Đánh dấu đã đọc</button>
                 </div>
+                <div class="notification-list">
+                  <div v-for="notification in notifications" :key="notification.id" class="notification-item">
+                    <div class="notification-icon">
+                      <i :class="notification.icon"></i>
+                    </div>
+                    <div class="notification-content">
+                      <p>{{ notification.message }}</p>
+                      <span class="notification-time">{{ notification.time }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="action-item" @click="refreshData">
+              <i class="fas fa-sync-alt" :class="{ spinning: isRefreshing }"></i>
             </div>
             
-            <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <span class="section-title">CHÍNH</span>
-                    <router-link 
-                        v-for="item in mainMenuItems" 
-                        :key="item.path"
-                        :to="item.path"
-                        class="nav-item"
-                        :class="{ active: currentRoute === item.path }"
-                        @click="closeMobileSidebar"
-                    >
-                        <div class="nav-icon">
-                            <i :class="item.icon"></i>
-                        </div>
-                        <span class="nav-text">{{ item.name }}</span>
-                        <div class="nav-indicator"></div>
-                    </router-link>
-                </div>
-
-                <div class="nav-section">
-                    <span class="section-title">QUẢN LÝ</span>
-                    <router-link 
-                        v-for="item in managementMenuItems" 
-                        :key="item.path"
-                        :to="item.path"
-                        class="nav-item"
-                        :class="{ active: currentRoute === item.path }"
-                        @click="closeMobileSidebar"
-                    >
-                        <div class="nav-icon">
-                            <i :class="item.icon"></i>
-                        </div>
-                        <span class="nav-text">{{ item.name }}</span>
-                        <div class="nav-indicator"></div>
-                    </router-link>
-                </div>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="admin-card">
-                    <div class="admin-avatar">
-                        <img :src="adminAvatar" alt="Admin" />
-                        <div class="status-dot"></div>
-                    </div>
-                    <div class="admin-info">
-                        <span class="admin-name">{{ adminName }}</span>
-                        <span class="admin-role">Administrator</span>
-                    </div>
-                    <button @click="showUserMenu" class="user-menu-btn">
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
-                </div>
-                
-                <button @click="logout" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Đăng xuất</span>
-                </button>
+            <div class="action-item" @click="openSettings">
+              <i class="fas fa-cog"></i>
             </div>
+
+            <!-- Theme Toggle -->
+            <div class="action-item theme-toggle" @click="toggleTheme">
+              <i :class="isDarkTheme ? 'fas fa-sun' : 'fas fa-moon'"></i>
+            </div>
+          </div>
         </div>
+      </header>
 
-        <!-- Main Content -->
-        <div class="dashboard-main">
-            <!-- Header -->
-            <header class="main-header">
-                <div class="header-left">
-                    <div class="page-title">
-                        <h1>{{ pageTitle }}</h1>
-                        <span class="page-subtitle">{{ pageSubtitle }}</span>
-                    </div>
-                </div>
-                
-                <div class="header-right">
-                    <!-- Search -->
-                    <div class="header-search">
-                        <div class="search-input">
-                            <i class="fas fa-search"></i>
-                            <input 
-                                type="text" 
-                                v-model="searchQuery"
-                                placeholder="Tìm kiếm..."
-                                @input="handleSearch"
-                                @focus="searchFocused = true"
-                                @blur="searchFocused = false"
-                            >
-                        </div>
-                        <div class="search-suggestions" v-if="searchFocused && searchQuery">
-                            <!-- Search suggestions would go here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Actions -->
-                    <div class="header-actions">
-                        <!-- Notifications -->
-                        <div class="action-item notification-bell" @click="toggleNotifications">
-                            <i class="fas fa-bell"></i>
-                            <span v-if="notifications.length" class="notification-badge">
-                                {{ notifications.length }}
-                            </span>
-                            <div class="notification-panel" v-if="showNotifications">
-                                <div class="panel-header">
-                                    <h4>Thông báo</h4>
-                                    <button class="mark-read-btn">Đánh dấu đã đọc</button>
-                                </div>
-                                <div class="notification-list">
-                                    <div v-for="notification in notifications" :key="notification.id" class="notification-item">
-                                        <div class="notification-icon">
-                                            <i :class="notification.icon"></i>
-                                        </div>
-                                        <div class="notification-content">
-                                            <p>{{ notification.message }}</p>
-                                            <span class="notification-time">{{ notification.time }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Actions -->
-                        <div class="action-item" @click="refreshData">
-                            <i class="fas fa-sync-alt" :class="{ spinning: isRefreshing }"></i>
-                        </div>
-                        
-                        <div class="action-item" @click="openSettings">
-                            <i class="fas fa-cog"></i>
-                        </div>
-
-                        <!-- Theme Toggle -->
-                        <div class="action-item theme-toggle" @click="toggleTheme">
-                            <i :class="isDarkTheme ? 'fas fa-sun' : 'fas fa-moon'"></i>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <main class="main-content">
-                <router-view></router-view>
-            </main>
-        </div>
-
-        <!-- Overlay for mobile -->
-        <div class="sidebar-overlay" 
-             v-if="sidebarOpen" 
-             @click="closeMobileSidebar"></div>
+      <!-- Content Area -->
+      <main class="main-content">
+        <router-view></router-view>
+      </main>
     </div>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" 
+         v-if="sidebarOpen" 
+         @click="closeMobileSidebar"></div>
+  </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 export default {
@@ -196,9 +193,9 @@ export default {
 
     // Menu items
     const mainMenuItems = [
-      { name: 'Tổng quan', path: '/admin', icon: 'fas fa-home' },
+      { name: 'Tổng quan', path: '/admin/dashboard', icon: 'fas fa-home' },
       { name: 'Analytics', path: '/admin/analytics', icon: 'fas fa-chart-line' },
-      { name: 'Thông báo', path: '/admin/notifications', icon: 'fas fa-bell' }
+      { name: 'Thống kê', path: '/admin/stats', icon: 'fas fa-chart-bar' }
     ];
 
     const managementMenuItems = [
@@ -219,9 +216,10 @@ export default {
 
     const pageSubtitle = computed(() => {
       const subtitles = {
-        '/admin': 'Xem tổng quan hệ thống',
+        '/admin/dashboard': 'Xem tổng quan hệ thống',
         '/admin/users': 'Quản lý người dùng hệ thống',
         '/admin/analytics': 'Phân tích dữ liệu',
+        '/admin/stats': 'Thống kê hệ thống',
         '/admin/settings': 'Cài đặt hệ thống'
       };
       return subtitles[route.path] || 'Quản lý và điều hành';
@@ -272,18 +270,12 @@ export default {
     };
 
     const logout = () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
       router.push('/login');
     };
 
     const loadNotifications = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3002/api/admin/notifications', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
+        const response = await fetch('http://localhost:3002/api/admin/notifications');
         if (response.ok) {
           const data = await response.json();
           notifications.value = data.notifications;
@@ -296,28 +288,16 @@ export default {
     // Lifecycle
     onMounted(async () => {
       try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-          adminName.value = user.full_name || user.username;
-          if (user.profile_image) {
-            adminAvatar.value = `http://localhost:3002${user.profile_image}`;
-          }
-        }
         await loadNotifications();
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       }
-    });
-
-    // Handle click outside notifications
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('.notification-bell')) {
-        showNotifications.value = false;
-      }
-    };
-
-    onMounted(() => {
-      document.addEventListener('click', handleClickOutside);
+      
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.notification-bell')) {
+          showNotifications.value = false;
+        }
+      });
     });
 
     return {
@@ -350,7 +330,12 @@ export default {
 </script>
 
 <style scoped>
-/* CSS Variables */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --primary: #6366f1;
   --primary-light: #818cf8;
@@ -360,85 +345,62 @@ export default {
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-  
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
-  --bg-overlay: rgba(0, 0, 0, 0.5);
-  
+  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
-  
   --border: #e2e8f0;
-  --border-light: #f1f5f9;
-  
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
   --sidebar-width: 280px;
   --header-height: 80px;
 }
 
-/* Dark theme variables */
-:root.dark-theme {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --border: #334155;
-  --border-light: #475569;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
   background: var(--bg-secondary);
   color: var(--text-primary);
+}
+
+.admin-dashboard {
+  display: flex;
+  min-height: 100vh;
 }
 
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
   display: none;
   position: fixed;
-  top: 1rem;
-  left: 1rem;
+  top: 1.5rem;
+  left: 1.5rem;
   z-index: 1001;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 0.75rem;
+  background: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.9rem;
   cursor: pointer;
   box-shadow: var(--shadow-md);
-  color: var(--text-primary);
+  color: var(--primary);
+  transition: all 0.3s ease;
 }
 
-/* Dashboard Layout */
-.admin-dashboard {
-  display: flex;
-  min-height: 100vh;
+.mobile-menu-toggle:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.mobile-menu-toggle i {
+  font-size: 1.2rem;
 }
 
 /* Sidebar */
 .dashboard-sidebar {
   width: var(--sidebar-width);
-  background: var(--bg-primary);
+  background: white;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -447,12 +409,14 @@ body {
   top: 0;
   height: 100vh;
   z-index: 1000;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.06);
 }
 
 .sidebar-header {
-  padding: 2rem 1.5rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
+  padding: 2rem 1.75rem;
+  background: var(--bg-gradient);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .brand {
@@ -462,34 +426,50 @@ body {
 }
 
 .brand-logo .logo-circle {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  border-radius: var(--radius-md);
+  width: 52px;
+  height: 52px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
 
 .brand-text h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
   margin-bottom: 0.125rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .brand-text span {
-  font-size: 0.875rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
 }
 
 /* Navigation */
 .sidebar-nav {
   flex: 1;
-  padding: 1.5rem 1rem;
+  padding: 1.75rem 1rem;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
 }
 
 .nav-section {
@@ -497,11 +477,11 @@ body {
 }
 
 .section-title {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   margin-bottom: 1rem;
   padding: 0 1rem;
 }
@@ -510,38 +490,50 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.875rem 1rem;
-  margin-bottom: 0.25rem;
-  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.5rem;
+  border-radius: 14px;
   color: var(--text-secondary);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
+  font-weight: 600;
+  font-size: 0.9rem;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
 .nav-item:hover {
-  background: var(--bg-secondary);
+  background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(118,75,162,0.08) 100%);
   color: var(--primary);
-  transform: translateX(4px);
+  transform: translateX(6px);
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: var(--bg-gradient);
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+  transform: translateX(0);
 }
 
-.nav-item.active .nav-indicator {
-  opacity: 1;
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: white;
+  border-radius: 0 4px 4px 0;
+  opacity: 0.8;
 }
 
 .nav-icon {
-  width: 20px;
+  width: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.1rem;
 }
 
 .nav-text {
@@ -549,105 +541,143 @@ body {
 }
 
 .nav-indicator {
-  width: 6px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.8);
+  width: 8px;
+  height: 8px;
+  background: rgba(255,255,255,0.9);
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
+  box-shadow: 0 0 8px rgba(255,255,255,0.6);
+}
+
+.nav-item.active .nav-indicator {
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
 }
 
 /* Sidebar Footer */
 .sidebar-footer {
-  padding: 1rem 1.5rem 2rem;
-  border-top: 1px solid var(--border-light);
+  padding: 1.25rem 1.5rem 2rem;
+  border-top: 1px solid var(--border);
+  background: linear-gradient(to bottom, transparent, rgba(248,250,252,0.8));
 }
 
 .admin-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1rem;
+  background: var(--bg-gradient);
+  border: none;
+  border-radius: 16px;
+  padding: 1.25rem;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20%, -20%); }
 }
 
 .admin-avatar {
   position: relative;
+  z-index: 1;
 }
 
 .admin-avatar img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .status-dot {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 12px;
-  height: 12px;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
   background: var(--success);
-  border: 2px solid var(--bg-primary);
+  border: 3px solid white;
   border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .admin-info {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  z-index: 1;
 }
 
 .admin-name {
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .admin-role {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
 }
 
 .user-menu-btn {
-  background: none;
+  background: rgba(255,255,255,0.2);
   border: none;
-  color: var(--text-muted);
+  color: white;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  z-index: 1;
 }
 
 .user-menu-btn:hover {
-  background: var(--bg-tertiary);
-  color: var(--primary);
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
 }
 
 .logout-btn {
   width: 100%;
-  background: var(--danger);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border: none;
-  border-radius: var(--radius-md);
-  padding: 0.75rem 1rem;
-  font-weight: 500;
-  font-size: 0.875rem;
+  border-radius: 14px;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(239,68,68,0.3);
 }
 
 .logout-btn:hover {
-  background: #dc2626;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(239,68,68,0.4);
 }
 
 /* Main Content */
@@ -655,14 +685,13 @@ body {
   flex: 1;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
-  background: var(--bg-secondary);
 }
 
 /* Header */
 .main-header {
-  background: var(--bg-primary);
+  background: white;
   border-bottom: 1px solid var(--border);
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 2.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -670,18 +699,23 @@ body {
   top: 0;
   z-index: 100;
   height: var(--header-height);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
 }
 
-.header-left .page-title h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
+.page-title h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  background: var(--bg-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.25rem;
 }
 
 .page-subtitle {
   color: var(--text-muted);
   font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .header-right {
@@ -701,99 +735,117 @@ body {
 
 .search-input i {
   position: absolute;
-  left: 1rem;
+  left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .search-input input {
-  width: 300px;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  width: 350px;
+  padding: 0.9rem 1.25rem 0.9rem 3rem;
+  border: 2px solid var(--border);
+  border-radius: 16px;
   background: var(--bg-secondary);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .search-input input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  background: var(--bg-primary);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+}
+
+.search-input input::placeholder {
+  color: var(--text-muted);
 }
 
 /* Header Actions */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .action-item {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 1.1rem;
 }
 
 .action-item:hover {
-  background: var(--bg-primary);
+  background: white;
   color: var(--primary);
-  transform: translateY(-1px);
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.2);
 }
 
 .notification-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--danger);
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.125rem 0.375rem;
-  border-radius: 10px;
-  min-width: 18px;
-  height: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 12px;
+  min-width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(239,68,68,0.4);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 /* Notification Panel */
 .notification-panel {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  top: calc(100% + 1rem);
   right: 0;
-  width: 350px;
-  background: var(--bg-primary);
+  width: 380px;
+  background: white;
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
+  border-radius: 20px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15);
   z-index: 1000;
+  overflow: hidden;
 }
 
 .panel-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--bg-secondary);
 }
 
 .panel-header h4 {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.1rem;
   color: var(--text-primary);
 }
 
@@ -801,28 +853,30 @@ body {
   background: none;
   border: none;
   color: var(--primary);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .mark-read-btn:hover {
-  background: var(--bg-secondary);
+  background: rgba(99,102,241,0.1);
 }
 
 .notification-list {
-  max-height: 300px;
+  max-height: 350px;
   overflow-y: auto;
 }
 
 .notification-item {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--border);
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .notification-item:hover {
@@ -834,26 +888,35 @@ body {
 }
 
 .notification-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
+  width: 42px;
+  height: 42px;
+  background: var(--bg-gradient);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
+  color: white;
   flex-shrink: 0;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.25);
+}
+
+.notification-content {
+  flex: 1;
 }
 
 .notification-content p {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.5;
 }
 
 .notification-time {
   font-size: 0.75rem;
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* Spinning animation */
@@ -868,8 +931,9 @@ body {
 
 /* Main Content Area */
 .main-content {
-  padding: 2rem;
+  padding: 2.5rem;
   min-height: calc(100vh - var(--header-height));
+  background: var(--bg-secondary);
 }
 
 /* Sidebar Overlay */
@@ -880,8 +944,15 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--bg-overlay);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
   z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Responsive Design */
@@ -889,87 +960,5 @@ body {
   .mobile-menu-toggle {
     display: block;
   }
-  
-  .dashboard-sidebar {
-    transform: translateX(-100%);
-  }
-  
-  .dashboard-sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-  
-  .dashboard-main {
-    margin-left: 0;
-  }
-  
-  .main-header {
-    padding: 1rem 1.5rem 1rem 4.5rem;
-  }
-  
-  .sidebar-overlay {
-    display: block;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-header {
-    flex-direction: column;
-    gap: 1rem;
-    height: auto;
-    padding: 1rem 1.5rem 1rem 4.5rem;
-  }
-  
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .search-input input {
-    width: 200px;
-  }
-  
-  .notification-panel {
-    width: 300px;
-  }
-  
-  .main-content {
-    padding: 1rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .search-input input {
-    width: 150px;
-  }
-  
-  .notification-panel {
-    width: 280px;
-  }
-  
-  .header-actions .action-item {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .spinning {
-    animation: none;
-  }
-  
-  .nav-item:hover,
-  .action-item:hover,
-  .logout-btn:hover {
-    transform: none;
-  }
-}
-
-/* Focus styles */
-.nav-item:focus,
-.action-item:focus,
-.logout-btn:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
 }
 </style>

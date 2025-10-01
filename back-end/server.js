@@ -5,6 +5,10 @@ const authRoutes = require('./routes/auth');
 const notesRoutes = require('./routes/notes');
 const categoriesRoutes = require('./routes/categories');
 const tagsRoutes = require('./routes/tags');
+const chatRoutes = require('./routes/chat');
+
+// Import middleware
+const { verifyToken } = require('./middleware/authVerify');
 
 const app = express();
 
@@ -15,6 +19,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working' });
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads')); // Serve uploaded files
@@ -24,18 +33,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/tags', tagsRoutes);
+app.use('/chat', chatRoutes);
 
 // Route cập nhật profile
-app.put("/api/profile", async (req, res) => {
+app.put("/api/profile", verifyToken, async (req, res) => {
   try {
-    const { userId, email, full_name } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Thiếu userId'
-      });
-    }
+    const userId = req.user.id; // Lấy từ token thay vì req.body
+    const { email, full_name } = req.body;
 
     if (!email && !full_name) {
       return res.status(400).json({
@@ -93,19 +97,23 @@ app.put("/api/profile", async (req, res) => {
 });
 
 // Route lấy thông tin profile
-app.get("/api/profile", async (req, res) => {
+app.get("/api/profile", verifyToken, async (req, res) => {
   try {
-    const { userId } = req.query;
-    
-    const [users] = await db.promise().execute(
+    const userId = req.user.id; // Lấy từ token đã được decode
+    console.log('GET /api/profile - userId from token:', userId);
+
+    console.log('Executing query for userId:', userId);
+    const [users] = await db.execute(
       'SELECT id, username, email, full_name, profile_image, created_at FROM users WHERE id = ?',
       [userId]
     );
     
-    if (users.length === 0) {
+    console.log('Query result:', users);
+    
+    if (!users || users.length === 0) {
       return res.status(404).json({
         status: 'error',
-        message: 'User not found'
+        message: 'Không tìm thấy thông tin người dùng'
       });
     }
 
@@ -117,6 +125,15 @@ app.get("/api/profile", async (req, res) => {
     });
   } catch (error) {
     console.error('Get profile error:', error);
+    // Log chi tiết lỗi database nếu có
+    if (error.sql) {
+      console.error('SQL Error:', {
+        code: error.code,
+        errno: error.errno,
+        sql: error.sql,
+        sqlState: error.sqlState
+      });
+    }
     res.status(500).json({
       status: 'error',
       message: 'Đã xảy ra lỗi khi lấy thông tin người dùng'
@@ -150,9 +167,9 @@ const upload = multer({
   }
 });
 
-app.post("/api/profile/image", upload.single('profile_image'), async (req, res) => {
+app.post("/api/profile/image", verifyToken, upload.single('profile_image'), async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.user.id; // Lấy từ token thay vì req.body
     
     if (!req.file) {
       return res.status(400).json({

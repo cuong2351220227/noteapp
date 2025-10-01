@@ -1,33 +1,27 @@
 const db = require('./db');
 
-// Test the database connection
-console.log('Testing database connection...');
+async function testDatabase() {
+    try {
+        console.log('Testing database connection...');
 
-// Try to query the users table
-db.query('SHOW TABLES', (error, results) => {
-    if (error) {
-        console.error('Error querying database:', error);
+        // Test SHOW TABLES
+        const [tables] = await db.execute('SHOW TABLES');
+        console.log('Available tables:', tables);
+
+        // Test users table
+        const [users] = await db.execute('SELECT * FROM users LIMIT 1');
+        console.log('Users table data:', users);
+
+        // Test specific user
+        const [user] = await db.execute('SELECT * FROM users WHERE id = ?', [8]);
+        console.log('User with ID 8:', user);
+
+        console.log('Database test completed successfully');
+        process.exit(0);
+    } catch (error) {
+        console.error('Database test failed:', error);
         process.exit(1);
     }
-    
-    console.log('Available tables:', results);
-    
-    // Test users table
-    db.query('SELECT * FROM users LIMIT 1', (error, users) => {
-        if (error) {
-            console.error('Error querying users table:', error);
-        } else {
-            console.log('Users table accessible, sample data:', users);
-        }
-        
-        // Close the connection
-        db.end((err) => {
-            if (err) {
-                console.error('Error closing connection:', err);
-                process.exit(1);
-            }
-            console.log('Database connection test completed.');
-            process.exit(0);
-        });
-    });
-});
+}
+
+testDatabase();

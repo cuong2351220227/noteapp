@@ -274,8 +274,47 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Get user profile
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Lấy từ token đã được decode
+
+    db.query('SELECT id, username, email, full_name, created_at FROM users WHERE id = ?', [userId], (err, results) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Lỗi truy vấn cơ sở dữ liệu'
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 'error', 
+          message: 'Không tìm thấy người dùng'
+        });
+      }
+
+      const user = results[0];
+      res.json({
+        status: 'success',
+        data: {
+          user: user
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Lỗi server nội bộ'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
-  updateProfile
+  updateProfile,
+  getProfile
 };

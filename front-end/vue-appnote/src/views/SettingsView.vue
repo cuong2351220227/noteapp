@@ -74,7 +74,7 @@
                   </div>
                   <div class="avatar-info">
                     <h4>{{ settings.fullName || 'Chưa cập nhật' }}</h4>
-                    <span class="user-role">Người dùng</span>
+                    <span class="user-role">{{ settings.username || 'Người dùng' }}</span>
                   </div>
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default {
       ],
       settings: {
         email: '',
-        full_name: '',
+        fullName: '', // Thống nhất sử dụng fullName cho frontend
         username: '',
         createdAt: null,
         language: 'vi',
@@ -380,8 +380,12 @@ export default {
     async loadUserData() {
       try {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+          console.log('No token, skipping profile load');
+          return;
+        }
 
+        // Gọi API với token trong header
         const response = await apiCall('/profile', {
           method: 'GET',
           headers: {
@@ -389,17 +393,36 @@ export default {
           }
         });
 
-        if (response.status === 'success') {
+        console.log('Profile API response:', response);
+
+        if (response.status === 'success' && response.data.user) {
           const user = response.data.user;
-          this.settings.email = user.email || '';
-          this.settings.fullName = user.full_name || '';
-          this.settings.username = user.username || '';
-          this.settings.createdAt = user.created_at;
-          this.userProfileImage = user.profile_image ? `http://localhost:3002${user.profile_image}` : null;
+          console.log('User data received:', user);
+          
+          // Map từ API response vào local state với xử lý dữ liệu null/undefined
+          this.settings = {
+            ...this.settings,
+            email: user.email || 'Chưa cập nhật',
+            fullName: user.full_name || 'Chưa cập nhật', // API trả về full_name, map vào fullName
+            username: user.username || 'Chưa cập nhật',
+            createdAt: user.created_at || new Date().toISOString()
+          };
+          console.log('Mapped settings:', this.settings);
+
+          // Xử lý ảnh profile
+          if (user.profile_image) {
+            this.userProfileImage = user.profile_image.startsWith('http') 
+              ? user.profile_image 
+              : `http://localhost:3002${user.profile_image}`;
+            console.log('Profile image URL:', this.userProfileImage);
+          } else {
+            this.userProfileImage = null;
+          }
           
           // Cập nhật localStorage
           localStorage.setItem('user', JSON.stringify(user));
         }
+
       } catch (error) {
         console.error('Error loading user data:', error);
         // Thử lấy từ localStorage nếu API fails
@@ -447,7 +470,7 @@ export default {
             // Save to localStorage as fallback
             const userData = JSON.parse(localStorage.getItem('user') || '{}');
             userData.email = this.settings.email;
-            userData.full_name = this.settings.full_name;
+            userData.full_name = this.settings.fullName; // Lưu dưới dạng full_name trong localStorage
             localStorage.setItem('user', JSON.stringify(userData));
             
             // Dispatch event to update navbar
@@ -487,16 +510,16 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng');
         }
 
+        console.log('Updating profile with data:', {
+          email: this.settings.email,
+          full_name: this.settings.fullName // Gửi dưới dạng full_name cho API
+        });
+
         const data = await apiCall('/profile', {
           method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
-            userId: userId,
             email: this.settings.email,
-            full_name: this.settings.full_name
+            full_name: this.settings.fullName // API endpoint mong đợi full_name
           })
         });
 
@@ -534,12 +557,24 @@ export default {
     },
 
     formatDate(date) {
-      if (!date) return '';
-      return new Date(date).toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      if (!date) return 'Chưa có dữ liệu';
+      try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) {
+          console.error('Invalid date:', date);
+          return 'Định dạng không hợp lệ';
+        }
+        return d.toLocaleDateString('vi-VN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Lỗi định dạng ngày';
+      }
     },
 
     handleImageChange(event) {
@@ -559,14 +594,10 @@ export default {
     async uploadProfileImage(formData) {
       try {
         this.isLoading = true;
-        const token = localStorage.getItem('token');
         
         const response = await apiCall('/profile/image', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
+          body: formData // FormData không cần JSON stringify
         });
 
         if (response.status === 'success') {
