@@ -9,7 +9,8 @@ export const useAuthStore = defineStore('auth', {
 
     getters: {
         isAuthenticated: (state) => !!state.token,
-        currentUser: (state) => state.user
+        currentUser: (state) => state.user,
+        isAdmin: (state) => state.user?.role === 'admin'
     },
 
     actions: {
@@ -18,6 +19,11 @@ export const useAuthStore = defineStore('auth', {
                 const data = await api.auth.login(credentials);
                 this.user = data.user;
                 this.token = data.token;
+                
+                // Lưu vào localStorage
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('token', data.token);
+                
                 return data;
             } catch (error) {
                 console.error('Login error:', error);
@@ -39,6 +45,10 @@ export const useAuthStore = defineStore('auth', {
             api.auth.logout();
             this.user = null;
             this.token = null;
+            
+            // Xóa khỏi localStorage
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
         }
     }
 });

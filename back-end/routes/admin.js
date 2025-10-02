@@ -1,124 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
-const checkAdminRole = require('../middleware/adminMiddleware');
+const { adminMiddleware } = require('../middleware/adminMiddleware');
+const adminController = require('../controllers/adminController');
 
-// Get dashboard statistics
-router.get('/stats', checkAdminRole, async (req, res) => {
-  try {
-    const stats = await pool.query(`
-      SELECT 
-        (SELECT COUNT(*) FROM users) as total_users,
-        (SELECT COUNT(*) FROM notes) as total_notes,
-        (SELECT COUNT(*) FROM users WHERE last_login > NOW() - INTERVAL '24 hours') as active_users
-    `);
+// Áp dụng middleware admin cho tất cả routes
+router.use(adminMiddleware);
 
-    res.json({
-      status: 'success',
-      data: stats.rows[0]
-    });
-  } catch (error) {
-    console.error('Error getting stats:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Lỗi khi lấy thống kê'
-    });
-  }
-});
+// Dashboard statistics
+router.get('/stats', adminController.getStats);
 
-// Get recent activities
-router.get('/activities', checkAdminRole, async (req, res) => {
-  try {
-    const activities = await pool.query(`
-      SELECT 
-        a.*,
-        u.username,
-        u.full_name
-      FROM activities a
-      JOIN users u ON a.user_id = u.id
-      ORDER BY a.created_at DESC
-      LIMIT 10
-    `);
+// User management
+router.get('/users', adminController.getUsers);
+router.post('/users', adminController.createUser);
+router.put('/users/:id', adminController.updateUser);
+router.put('/users/:id/toggle-status', adminController.toggleUserStatus);
+router.delete('/users/:id', adminController.deleteUser);
+router.get('/users/export', adminController.exportUsers);
 
-    res.json({
-      status: 'success',
-      data: activities.rows
-    });
-  } catch (error) {
-    console.error('Error getting activities:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Lỗi khi lấy hoạt động gần đây'
-    });
-  }
-});
+// Note management
+router.get('/notes', adminController.getNotes);
+router.delete('/notes/:id', adminController.deleteNote);
 
-// Get all users with pagination
-router.get('/users', checkAdminRole, async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
+// Activities
+router.get('/activities', adminController.getRecentActivities);
 
-  try {
-    const users = await pool.query(`
-      SELECT 
-        id, username, email, full_name, role, created_at,
-        last_login, profile_image
-      FROM users
-      ORDER BY created_at DESC
-      LIMIT $1 OFFSET $2
-    `, [limit, offset]);
-
-    const total = await pool.query('SELECT COUNT(*) FROM users');
-
-    res.json({
-      status: 'success',
-      data: {
-        users: users.rows,
-        total: parseInt(total.rows[0].count),
-        page: parseInt(page),
-        totalPages: Math.ceil(total.rows[0].count / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Error getting users:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Lỗi khi lấy danh sách người dùng'
-    });
-  }
-});
-
-// Update user role
-router.put('/users/:id/role', checkAdminRole, async (req, res) => {
-  const { id } = req.params;
-  const { role } = req.body;
-
-  try {
-    const result = await pool.query(`
-      UPDATE users 
-      SET role = $1
-      WHERE id = $2
-      RETURNING id, username, email, role
-    `, [role, id]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Không tìm thấy người dùng'
-      });
-    }
-
-    res.json({
-      status: 'success',
-      data: result.rows[0]
-    });
-  } catch (error) {
-    console.error('Error updating user role:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Lỗi khi cập nhật quyền người dùng'
-    });
-  }
-});
+// System settings
+router.put('/settings', adminController.saveSettings);
 
 module.exports = router;

@@ -74,13 +74,52 @@ const routes = [
   {
     path: '/admin',
     name: 'admin',
-    component: () => import('../views/AdminDashboardNew.vue')
+    component: () => import('../views/AdminDashboardNew.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  // Kiểm tra authentication
+  if (to.meta.requiresAuth) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      next('/login')
+      return
+    }
+  }
+  
+  // Kiểm tra admin role
+  if (to.meta.requiresAdmin) {
+    const userStr = localStorage.getItem('user')
+    const token = localStorage.getItem('token')
+    
+    if (!token || !userStr) {
+      next('/login')
+      return
+    }
+    
+    try {
+      const user = JSON.parse(userStr)
+      if (!user || user.role !== 'admin') {
+        console.log('User is not admin:', user)
+        next('/home')
+        return
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error)
+      next('/login')
+      return
+    }
+  }
+  
+  next()
 })
 
 export default router

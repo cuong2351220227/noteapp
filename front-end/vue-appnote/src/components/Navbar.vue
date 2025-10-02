@@ -16,8 +16,14 @@
         <router-link to="/register" class="navbar-action-button">Đăng ký</router-link>
       </template>
       <template v-else>
-        <span class="user-account">{{ username }}</span>
-        <button @click="logout" class="navbar-action-button">Đăng xuất</button>
+        <div class="user-menu">
+          <span class="user-account">{{ username }}</span>
+          <router-link v-if="isAdmin" to="/admin" class="admin-link">
+            <i class="fas fa-shield-alt"></i>
+            Admin
+          </router-link>
+          <button @click="logout" class="navbar-action-button">Đăng xuất</button>
+        </div>
       </template>
     </div>
   </nav>
@@ -42,7 +48,8 @@ export default {
         { name: 'Bản demo', link: '#' },
       ],
       isLoggedIn: false,
-      username: ''
+      username: '',
+      isAdmin: false
     };
   },
   created() {
@@ -68,11 +75,13 @@ export default {
           const userData = JSON.parse(user);
           this.isLoggedIn = true;
           this.username = userData.username;
-          console.log('Login status updated:', userData.username);
+          this.isAdmin = userData.role === 'admin';
+          console.log('Login status updated:', userData.username, 'Admin:', this.isAdmin);
         } catch (e) {
           console.error('Error parsing user data:', e);
           this.isLoggedIn = false;
           this.username = '';
+          this.isAdmin = false;
           // Clear invalid data
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -80,6 +89,7 @@ export default {
       } else {
         this.isLoggedIn = false;
         this.username = '';
+        this.isAdmin = false;
       }
     },
     handleNavClick(item) {
@@ -143,6 +153,31 @@ export default {
 .navbar-actions {
   display: flex;
   align-items: center;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 .navbar-action-link {

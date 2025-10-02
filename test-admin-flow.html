@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Admin Dashboard Flow</h1>
+    
+    <div class="info test-result">
+        <h3>Thông tin đăng nhập:</h3>
+        <p><strong>Username:</strong> admin</p>
+        <p><strong>Password:</strong> admin123</p>
+        <p><strong>Backend:</strong> http://localhost:3002</p>
+        <p><strong>Frontend:</strong> http://localhost:5174</p>
+    </div>
+
+    <div id="results"></div>
+
+    <button class="btn-primary" onclick="testFlow()">🚀 Test Complete Flow</button>
+    <button class="btn-success" onclick="goToAdmin()">📊 Go to Admin Dashboard</button>
+
+    <script>
+        async function testFlow() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="info test-result">⏳ Testing admin flow...</div>';
+
+            try {
+                // Test 1: Login
+                console.log('Testing login...');
+                const loginResponse = await fetch('http://localhost:3002/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error(`Login failed: ${loginResponse.status}`);
+                }
+
+                const loginData = await loginResponse.json();
+                
+                if (loginData.status !== 'success') {
+                    throw new Error('Login response not successful');
+                }
+
+                results.innerHTML += '<div class="success test-result">✅ Login successful!</div>';
+                
+                // Store credentials
+                localStorage.setItem('user', JSON.stringify(loginData.data.user));
+                localStorage.setItem('token', loginData.data.token);
+                
+                results.innerHTML += `<div class="info test-result">
+                    👤 <strong>User:</strong> ${loginData.data.user.username}<br>
+                    🛡️ <strong>Role:</strong> ${loginData.data.user.role}<br>
+                    🔑 <strong>Token:</strong> ${loginData.data.token.substring(0, 50)}...
+                </div>`;
+
+                // Test 2: Admin Stats
+                console.log('Testing admin stats...');
+                const statsResponse = await fetch('http://localhost:3002/api/admin/stats', {
+                    headers: { 
+                        'Authorization': `Bearer ${loginData.data.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!statsResponse.ok) {
+                    throw new Error(`Stats failed: ${statsResponse.status}`);
+                }
+
+                const statsData = await statsResponse.json();
+                results.innerHTML += '<div class="success test-result">✅ Admin stats API working!</div>';
+                results.innerHTML += `<div class="info test-result">
+                    📊 <strong>Stats:</strong><br>
+                    - Total Users: ${statsData.data.totalUsers}<br>
+                    - Total Notes: ${statsData.data.totalNotes}<br>
+                    - New Users Today: ${statsData.data.newUsersToday}<br>
+                    - Active Users: ${statsData.data.activeUsers}
+                </div>`;
+
+                // Test 3: Admin Users
+                console.log('Testing admin users...');
+                const usersResponse = await fetch('http://localhost:3002/api/admin/users', {
+                    headers: { 
+                        'Authorization': `Bearer ${loginData.data.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!usersResponse.ok) {
+                    throw new Error(`Users failed: ${usersResponse.status}`);
+                }
+
+                const usersData = await usersResponse.json();
+                results.innerHTML += '<div class="success test-result">✅ Admin users API working!</div>';
+                results.innerHTML += `<div class="info test-result">
+                    👥 <strong>Users:</strong> ${usersData.data.length} total users found
+                </div>`;
+
+                results.innerHTML += '<div class="success test-result">🎉 All tests passed! You can now access the admin dashboard.</div>';
+
+            } catch (error) {
+                console.error('Test failed:', error);
+                results.innerHTML += `<div class="error test-result">❌ Test failed: ${error.message}</div>`;
+            }
+        }
+
+        function goToAdmin() {
+            window.open('http://localhost:5174/admin', '_blank');
+        }
+
+        // Auto-run test
+        window.onload = () => {
+            setTimeout(testFlow, 1000);
+        };
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@ const authRoutes = require('./routes/auth');
 const notesRoutes = require('./routes/notes');
 const categoriesRoutes = require('./routes/categories');
 const tagsRoutes = require('./routes/tags');
-const chatRoutes = require('./routes/chat');
+const adminRoutes = require('./routes/admin');
 
 // Import middleware
 const { verifyToken } = require('./middleware/authVerify');
@@ -33,7 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/tags', tagsRoutes);
-app.use('/chat', chatRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Route cập nhật profile
 app.put("/api/profile", verifyToken, async (req, res) => {
