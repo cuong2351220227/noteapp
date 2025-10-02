@@ -9,6 +9,7 @@ router.use(adminMiddleware);
 // Dashboard statistics
 router.get('/stats', adminController.getStats);
 
+
 // User management
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
